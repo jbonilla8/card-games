@@ -1,0 +1,26 @@
+Functionality
+- Componentize: Deck
+- Melding cards (at least 3)
+- Melding cards onto other people's hands
+- Calling rummy
+- Score keeping
+- Ending the game
+- Require player to meld if they drew from the discard
+- automated testing
+
+UI
+- Meld button disabled unless at least 3 selected
+- Be able to see other players' melds
+- Discard btn disabled til 1 and only 1 selected
+- Taking turns
+- See other people's melds
+- See other people's amount of cards in hand
+- Front of cards styling
+- Back of cards styling
+- Discard pile spredding out but partially overlapped
+
+Nice to haves:
+- Add player name
+- Change card styles
+- Change player area color
+- Play against comp
