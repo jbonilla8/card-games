@@ -22,10 +22,16 @@ const PlayerControlButton = styled.button`
   cursor: ${props => (props.onClick ? 'pointer' : 'auto')};
 `;
 
+const PlayerLabel = styled.div`
+  color: #fff;
+  font-weight: bold;
+  margin-top: 40px;
+`;
+
 const Player = props => {
   return (
     <Fragment>
-      <div>{props.player.playerId}</div>
+      <PlayerLabel>Player {props.player.playerId + 1}</PlayerLabel>
       <Hand
         player={props.player}
         onCardInHandClicked={props.onCardInHandClicked}

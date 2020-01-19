@@ -57,7 +57,7 @@ function App() {
   const [currentTurnPlayerId, setCurrentTurnPlayerId] = useState(0);
 
   useEffect(() => {
-    const numberOfPlayers = 3;
+    const numberOfPlayers = 2;
 
     let sizeOfHand = 13;
     let deck = buildDeck();
