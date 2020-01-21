@@ -12,8 +12,6 @@ Bugs
 - Can't draw from deck if it is empty
 
 UI
-- Display player melds
-- Be able to see other players' melds
 - Deck shows no cards when empty
 - Meld button disabled unless at least 3 selected
 - Discard btn disabled til 1 and only 1 selected
