@@ -4,12 +4,21 @@ import styled from 'styled-components';
 import DiscardPile from './components/DiscardPile';
 import Player from './components/Player';
 import { canMeldSet, canMeldRun } from './utilities/Rummy/rummy500Utils';
+import OpponentMelds from './components/OpponentMelds';
 
 const PlayingArea = styled.div`
+  display: grid;
+  grid-template-columns: 70% 30%;
   width: 100%;
   height: 100vh;
   margin: auto;
   background-color: #477148;
+  color: #fff;
+  font-weight: bold;
+`;
+
+const CurrentPlayerArea = styled.div`
+  border-right: 2px solid #000;
 `;
 
 const buildDeck = () => {
@@ -149,8 +158,10 @@ function App() {
     const isValidSetToBeMelded = canMeldSet(selectedCards);
     const isValidRunToBeMelded = canMeldRun(selectedCards);
 
-    if(!(isValidSetToBeMelded || isValidRunToBeMelded)){
-      throw new Error("The cards can not be melded, it is not a valid set or run");
+    if (!(isValidSetToBeMelded || isValidRunToBeMelded)) {
+      throw new Error(
+        'The cards can not be melded, it is not a valid set or run'
+      );
     }
 
     // update state to show that meld has happened
@@ -189,27 +200,30 @@ function App() {
 
   return (
     <PlayingArea>
-      {/* {deck.map(card => (
-        <Card {...card} />
-      ))} */}
-      <Card onCardClick={deckClickedHandler} isCardFaceDown={true} />
+      <CurrentPlayerArea>
+        <Card onCardClick={deckClickedHandler} isCardFaceDown={true} />
 
-      <DiscardPile
-        discard={discard}
-        onDiscardPileCardClicked={onDiscardPileCardClickedHandler}
+        <DiscardPile
+          discard={discard}
+          onDiscardPileCardClicked={onDiscardPileCardClickedHandler}
+        />
+
+        {players
+          .filter(player => currentTurnPlayerId === player.playerId)
+          .map(player => (
+            <Player
+              key={player.playerId}
+              player={player}
+              onCardInHandClicked={cardInHandClickedHandler}
+              onPlayerMeldClicked={playerMeldClickedHandler}
+              onPlayerDiscardClicked={playerDiscardClickedHandler}
+            />
+          ))}
+      </CurrentPlayerArea>
+      <OpponentMelds
+        currentTurnPlayerId={currentTurnPlayerId}
+        players={players}
       />
-
-      {players
-        .filter(player => currentTurnPlayerId === player.playerId)
-        .map(player => (
-          <Player
-            key={player.playerId}
-            player={player}
-            onCardInHandClicked={cardInHandClickedHandler}
-            onPlayerMeldClicked={playerMeldClickedHandler}
-            onPlayerDiscardClicked={playerDiscardClickedHandler}
-          />
-        ))}
     </PlayingArea>
   );
 }

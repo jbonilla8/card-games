@@ -1,6 +1,7 @@
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
 import Hand from './Hand';
+import PlayerMelds from './PlayerMelds';
 
 const PlayerControls = styled.div`
   display: flex;
@@ -23,8 +24,6 @@ const PlayerControlButton = styled.button`
 `;
 
 const PlayerLabel = styled.div`
-  color: #fff;
-  font-weight: bold;
   margin-top: 40px;
 `;
 
@@ -40,6 +39,7 @@ const Player = props => {
         <PlayerControlButton onClick={() => props.onPlayerMeldClicked(props.player)}>Meld</PlayerControlButton>
         <PlayerControlButton onClick={() => props.onPlayerDiscardClicked(props.player)}>Discard</PlayerControlButton>
       </PlayerControls>
+      <PlayerMelds player={props.player} />
     </Fragment>
   );
 };
