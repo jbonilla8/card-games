@@ -10,9 +10,7 @@ const PlayingArea = styled.div`
   display: grid;
   grid-template-columns: 70% 30%;
   width: 100%;
-  height: 100vh;
   margin: auto;
-  background-color: #477148;
   color: #fff;
   font-weight: bold;
 `;
@@ -99,11 +97,14 @@ function App() {
   }, []);
 
   const deckClickedHandler = () => {
-    const card = deck.pop();
-    players[currentTurnPlayerId].hand.push(card);
+    if (deck.length > 0) {
+      const card = deck.pop();
 
-    setDeck([...deck]);
-    setPlayers([...players]);
+      players[currentTurnPlayerId].hand.push(card);
+
+      setDeck([...deck]);
+      setPlayers([...players]);
+    }
   };
 
   const discardCardFromHand = (cardToDiscard, currentPlayer) => {

@@ -6,6 +6,7 @@ const PlayerMelds = props => {
     <Fragment>
       {props.player.melds.map(meld => (
         <Meld
+          cardSize={props.cardSize}
           meld={meld}
           onCardClick={() => props.onCardInHandClicked(null, props.player)}
         />

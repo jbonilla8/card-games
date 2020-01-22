@@ -7,6 +7,7 @@ const Meld = (props) => {
       {props.meld.cards.map(card => (
         <Card
           {...card}
+          cardSize = {props.cardSize}
           onCardClick={() => props.onCardInHandClicked(card, props.player)}
         />
       ))}

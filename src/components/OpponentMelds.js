@@ -12,6 +12,7 @@ const OpponentMelds = props => {
         <Fragment>
           Player {player.playerId + 1}
           <PlayerMelds
+            cardSize="small"
             player={player}
             onCardClick={() => props.onCardInHandClicked(null, props.player)}
           />
