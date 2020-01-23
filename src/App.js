@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Card from './components/Card';
+import Deck from './components/Deck';
 import styled from 'styled-components';
 import DiscardPile from './components/DiscardPile';
 import Player from './components/Player';
@@ -17,6 +17,10 @@ const PlayingArea = styled.div`
 
 const CurrentPlayerArea = styled.div`
   border-right: 2px solid #000;
+`;
+
+const DeckDiscardWrapper = styled.div`
+  display: flex;
 `;
 
 const buildDeck = () => {
@@ -62,6 +66,7 @@ function App() {
   const [players, setPlayers] = useState([]);
   const [discard, setDiscard] = useState([]);
   const [currentTurnPlayerId, setCurrentTurnPlayerId] = useState(0);
+  const [meldId, setMeldId] = useState(1);
 
   useEffect(() => {
     const numberOfPlayers = 2;
@@ -167,7 +172,8 @@ function App() {
 
     // update state to show that meld has happened
     const meld = {
-      cards: []
+      cards: [],
+      meldId: meldId
     };
 
     selectedCards.forEach(card => {
@@ -180,6 +186,7 @@ function App() {
     player.melds.push(meld);
 
     setPlayers([...players]);
+    setMeldId(meldId + 1);
   };
 
   const getSelectedCardsFromPlayer = player =>
@@ -202,13 +209,13 @@ function App() {
   return (
     <PlayingArea>
       <CurrentPlayerArea>
-        <Card onCardClick={deckClickedHandler} isCardFaceDown={true} />
-
-        <DiscardPile
-          discard={discard}
-          onDiscardPileCardClicked={onDiscardPileCardClickedHandler}
-        />
-
+        <DeckDiscardWrapper>
+          <Deck onDeckClicked={deckClickedHandler} />
+          <DiscardPile
+            discard={discard}
+            onDiscardPileCardClicked={onDiscardPileCardClickedHandler}
+          />
+        </DeckDiscardWrapper>
         {players
           .filter(player => currentTurnPlayerId === player.playerId)
           .map(player => (

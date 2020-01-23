@@ -1,5 +1,4 @@
 Functionality
-- Componentize: Deck
 - Melding cards onto other people's hands
 - Calling rummy
 - Score keeping
@@ -18,8 +17,8 @@ UI
 - Taking turns
 - See other people's amount of cards in hand
 - Front of cards styling
-- Back of cards styling
-- Discard pile spredding out but partially overlapped
+- Back of cards styling (in progress)
+- Discard pile spreading out but partially overlapped
 - Display filters to sort hand by suit and by rank
 
 Nice to haves:

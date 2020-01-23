@@ -27,8 +27,7 @@ const CardBorder = styled.div`
   box-shadow: ${props =>
     props.isSelected ? 'aquamarine 0px 0px 2px 2px' : '3px 3px 3px #333'};
   margin: 5px;
-  padding-left: 5px;
-  padding-right: 5px;
+  padding: 5px;
   font-weight: bold;
   font-size: 18px;
   background-color: #fff;
@@ -88,7 +87,7 @@ const StyledCornerMarker = styled(CornerMarker)`
   grid-column: ${props => (props.bottomRight ? '3/4' : '1/2')};
   grid-row: ${props => (props.bottomRight ? '3/4' : '1/2')};
   transform: ${props => (props.bottomRight ? 'rotate(180deg)' : null)};
-  align-self: center;
+  align-self: ${props => (props.bottomRight ? 'end' : 'start')};
   justify-self: center;
 `;
 
@@ -112,10 +111,20 @@ const StyledCardCenter = styled(CardCenter)`
 `;
 
 const BackOfCard = styled.div`
-  margin: 5px;
-  background-color: #7c45a4;
-  height: 100%;
-  width: 100%;
+  position: relative;
+  background-color: midnightblue;
+  grid-column: span 3;
+  grid-row: span 3;
+
+  &:after {
+    position: absolute;
+    left: 5px;
+    right: 5px;
+    top: 5px;
+    bottom: 5px;
+    border: 1px solid white;
+    content: "";
+  }
 `;
 
 const card = ({ suit, rank, onCardClick, ...props }) => {
