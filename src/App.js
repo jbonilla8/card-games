@@ -173,7 +173,9 @@ function App() {
     // update state to show that meld has happened
     const meld = {
       cards: [],
-      meldId: meldId
+      meldId: meldId,
+      isMeldSet: canMeldSet,
+      isMeldRun: canMeldRun
     };
 
     selectedCards.forEach(card => {

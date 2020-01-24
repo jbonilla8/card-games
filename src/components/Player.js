@@ -2,6 +2,7 @@ import React, { Fragment } from 'react';
 import styled from 'styled-components';
 import Hand from './Hand';
 import PlayerMelds from './PlayerMelds';
+import { calculatePointsForPlayer } from '../utilities/Rummy/rummy500Utils';
 
 const PlayerControls = styled.div`
   display: flex;
@@ -28,9 +29,11 @@ const PlayerLabel = styled.div`
 `;
 
 const Player = props => {
+  const points = calculatePointsForPlayer(props.player);
+
   return (
     <Fragment>
-      <PlayerLabel>Player {props.player.playerId + 1}</PlayerLabel>
+      <PlayerLabel>Player {props.player.playerId + 1} | Score: {points.totalPoints}</PlayerLabel>
       <Hand
         player={props.player}
         onCardInHandClicked={props.onCardInHandClicked}
