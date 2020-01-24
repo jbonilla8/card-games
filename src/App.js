@@ -13,10 +13,11 @@ const PlayingArea = styled.div`
   margin: auto;
   color: #fff;
   font-weight: bold;
+  height: 100%;
 `;
 
 const CurrentPlayerArea = styled.div`
-  border-right: 2px solid #000;
+  border-right: 2px solid #2E482E;
 `;
 
 const DeckDiscardWrapper = styled.div`
