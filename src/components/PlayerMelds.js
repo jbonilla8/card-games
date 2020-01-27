@@ -8,7 +8,8 @@ const PlayerMelds = props => {
         <Meld
           cardSize={props.cardSize}
           meld={meld}
-          onCardClick={() => props.onCardInHandClicked(null, props.player)}
+          player={props.player}
+          onExtendMeldClicked={props.onExtendMeldClicked}
         />
       ))}
     </Fragment>

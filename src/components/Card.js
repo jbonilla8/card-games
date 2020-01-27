@@ -41,6 +41,16 @@ const CardBorder = styled.div`
   }
 `;
 
+export const PlayableCardSlot = styled.div`
+  width: ${props => getCardWidth(props.cardSize)};
+  height: ${props => getCardHeight(props.cardSize)};
+  border: 2px dashed #2E482E;
+  border-radius: 5px;
+  margin: 5px;
+  display: inline-block;
+  cursor: ${props => (props.onClick ? 'pointer' : 'auto')};
+`;
+
 const Rank = styled.div`
   font: 'Times New Roman', serif;
   color: ${props => props.color};

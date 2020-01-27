@@ -8,9 +8,10 @@ Functionality
 Bugs
 - Require player to meld with 1st card drawn if they drew from the discard
 - Can only draw one card from the deck
-- Can't draw from deck if it is empty
 
 UI
+- Sort cards in melds
+- Suit icons too large on opponent melds
 - Deck shows no cards when empty
 - Meld button disabled unless at least 3 selected
 - Discard btn disabled til 1 and only 1 selected

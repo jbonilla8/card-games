@@ -17,7 +17,7 @@ const PlayingArea = styled.div`
 `;
 
 const CurrentPlayerArea = styled.div`
-  border-right: 2px solid #2E482E;
+  border-right: 2px solid #2e482e;
 `;
 
 const DeckDiscardWrapper = styled.div`
@@ -116,6 +116,8 @@ function App() {
   const discardCardFromHand = (cardToDiscard, currentPlayer) => {
     cardToDiscard.isSelected = false;
 
+    evaluatePlayableCardSlots(currentPlayer);
+
     discard.push(cardToDiscard);
 
     removeCardFromPlayersHand(currentPlayer, cardToDiscard);
@@ -127,9 +129,60 @@ function App() {
     setCurrentTurnPlayerId(nextTurnPlayerId);
   };
 
+  const areCardsValidMeld = cards => {
+    const result = {
+      isValidMeld: false,
+      isValidRun: false,
+      isValidSet: false
+    };
+
+    // check if cards produce a valid meld
+    const isValidSetToBeMelded = canMeldSet(cards);
+    const isValidRunToBeMelded = canMeldRun(cards);
+
+    if (cards.length >= 3 && (isValidSetToBeMelded || isValidRunToBeMelded)) {
+      result.isValidMeld = true;
+      result.isValidSet = isValidSetToBeMelded;
+      result.isValidRun = isValidRunToBeMelded;
+    }
+
+    return result;
+  };
+
+  const evaluatePlayableCardSlots = currentPlayer => {
+    const selectedCards = getSelectedCardsFromPlayer(currentPlayer);
+    // for discards - if only 1 card is selected, and if in discard phase, show slot in discard
+    if (selectedCards.length === 1) {
+      currentPlayer.canDiscardSelectedCard = true;
+    } else {
+      currentPlayer.canDiscardSelectedCard = false;
+    }
+
+    // for melds - check cards in hand for valid melds, make sure card has been drawn 1st, if so - make playableCardSlot appear in current player's meld area
+    if (areCardsValidMeld(selectedCards).isValidMeld) {
+      currentPlayer.numberOfMeldableCardSlots = selectedCards.length;
+    } else {
+      currentPlayer.numberOfMeldableCardSlots = 0;
+    }
+
+    // for melding off of other players' melds - check other players' melds for valid melds and show slots for these areas
+    players.forEach(player => {
+      player.melds.forEach(meld => {
+        if (areCardsValidMeld(selectedCards.concat(meld.cards)).isValidMeld) {
+          meld.numberOfMeldableCardSlots = selectedCards.length;
+        } else {
+          meld.numberOfMeldableCardSlots = 0;
+        }
+      });
+    });
+    setPlayers([...players]);
+  };
+
   const cardInHandClickedHandler = (clickedCard, currentPlayer) => {
     clickedCard.isSelected = !clickedCard.isSelected;
     setPlayers([...players]);
+
+    evaluatePlayableCardSlots(currentPlayer);
   };
 
   const onDiscardPileCardClickedHandler = clickedCard => {
@@ -150,33 +203,23 @@ function App() {
     player.hand.splice(index, 1);
   };
 
-  const playerMeldClickedHandler = player => {
-    // get selected cards
+  const createMeldForPlayer = (player, meldId, cardsCurrentlyInMeld) => {
     const selectedCards = getSelectedCardsFromPlayer(player);
 
-    if (selectedCards.length === 0) {
-      return;
-    }
+    const validMeldResult = areCardsValidMeld(
+      selectedCards.concat(cardsCurrentlyInMeld)
+    );
 
-    if (selectedCards.length < 3) {
-      throw new Error('you cannot meld less than 3 cards'); // todo - meld off other players
-    }
-    // check if cards produce a valid meld
-    const isValidSetToBeMelded = canMeldSet(selectedCards);
-    const isValidRunToBeMelded = canMeldRun(selectedCards);
-
-    if (!(isValidSetToBeMelded || isValidRunToBeMelded)) {
-      throw new Error(
-        'The cards can not be melded, it is not a valid set or run'
-      );
+    if (!validMeldResult.isValidMeld) {
+      throw new Error('This is an invalid meld');
     }
 
     // update state to show that meld has happened
     const meld = {
       cards: [],
       meldId: meldId,
-      isMeldSet: canMeldSet,
-      isMeldRun: canMeldRun
+      isMeldSet: validMeldResult.isValidSet,
+      isMeldRun: validMeldResult.isValidRun
     };
 
     selectedCards.forEach(card => {
@@ -189,6 +232,21 @@ function App() {
     player.melds.push(meld);
 
     setPlayers([...players]);
+    evaluatePlayableCardSlots(player);
+  };
+
+  const onExtendMeldClickedHandler = (currentPlayer, meldId) => {
+    const cardsCurrentlyInMeld = players
+      .map(player => player.melds)
+      .flat()
+      .filter(meld => meld.meldId === meldId)
+      .map(meld => meld.cards)
+      .flat();
+    createMeldForPlayer(currentPlayer, meldId, cardsCurrentlyInMeld);
+  };
+
+  const playerMeldClickedHandler = player => {
+    createMeldForPlayer(player, meldId, []);
     setMeldId(meldId + 1);
   };
 
@@ -209,6 +267,8 @@ function App() {
     discardCardFromHand(cardToDiscard, player);
   };
 
+  const currentPlayer = players[currentTurnPlayerId] || {};
+
   return (
     <PlayingArea>
       <CurrentPlayerArea>
@@ -217,6 +277,10 @@ function App() {
           <DiscardPile
             discard={discard}
             onDiscardPileCardClicked={onDiscardPileCardClickedHandler}
+            onDiscardPlayableSlotClicked={() =>
+              playerDiscardClickedHandler(currentPlayer)
+            }
+            showDiscardPlayableCardSlot={currentPlayer.canDiscardSelectedCard}
           />
         </DeckDiscardWrapper>
         {players
@@ -226,14 +290,16 @@ function App() {
               key={player.playerId}
               player={player}
               onCardInHandClicked={cardInHandClickedHandler}
-              onPlayerMeldClicked={playerMeldClickedHandler}
               onPlayerDiscardClicked={playerDiscardClickedHandler}
+              onPlayerMeldClicked={playerMeldClickedHandler}
+              onExtendMeldClicked={(meldId) => onExtendMeldClickedHandler(currentPlayer, meldId)}
             />
           ))}
       </CurrentPlayerArea>
       <OpponentMelds
         currentTurnPlayerId={currentTurnPlayerId}
         players={players}
+        onExtendMeldClicked={(meldId) => onExtendMeldClickedHandler(currentPlayer, meldId)}
       />
     </PlayingArea>
   );

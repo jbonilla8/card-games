@@ -1,17 +1,24 @@
-import React, { Fragment } from 'react';
-import Card from './Card';
+import React from 'react';
+import styled from 'styled-components';
+import Card, { PlayableCardSlot } from './Card';
 
-const Meld = (props) => {
+const MeldContainer = styled.div`
+  display: flex;
+`;
+
+const Meld = props => {
   return (
-    <Fragment>
+    <MeldContainer>
       {props.meld.cards.map(card => (
-        <Card
-          {...card}
-          cardSize = {props.cardSize}
-          onCardClick={() => props.onCardInHandClicked(card, props.player)}
+        <Card {...card} cardSize={props.cardSize} />
+      ))}
+      {[...Array(props.meld.numberOfMeldableCardSlots || 0)].map(_ => (
+        <PlayableCardSlot
+          cardSize={props.cardSize}
+          onClick={() => props.onExtendMeldClicked(props.meld.meldId)}
         />
       ))}
-    </Fragment>
+    </MeldContainer>
   );
 };
 
