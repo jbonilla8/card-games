@@ -62,12 +62,18 @@ const buildDeck = () => {
   return cards;
 };
 
+const Phases = {
+  DRAW_PHASE: 'DRAW_PHASE',
+  PLAY_PHASE: 'PLAY_PHASE'
+};
+
 function App() {
   const [deck, setDeck] = useState([]);
   const [players, setPlayers] = useState([]);
   const [discard, setDiscard] = useState([]);
   const [currentTurnPlayerId, setCurrentTurnPlayerId] = useState(0);
   const [meldId, setMeldId] = useState(1);
+  const [currentTurnPhase, setCurrentTurnPhase] = useState(Phases.DRAW_PHASE);
 
   useEffect(() => {
     const numberOfPlayers = 2;
@@ -103,13 +109,18 @@ function App() {
   }, []);
 
   const deckClickedHandler = () => {
-    if (deck.length > 0) {
+    if (deck.length > 0 && currentTurnPhase === Phases.DRAW_PHASE) {
       const card = deck.pop();
 
       players[currentTurnPlayerId].hand.push(card);
 
       setDeck([...deck]);
       setPlayers([...players]);
+      setCurrentTurnPhase(Phases.PLAY_PHASE);
+    } else {
+      alert(
+        "You can't draw twice, you may play a meld and must discard a card."
+      );
     }
   };
 
@@ -127,6 +138,7 @@ function App() {
     setDiscard([...discard]);
     const nextTurnPlayerId = (currentTurnPlayerId + 1) % players.length;
     setCurrentTurnPlayerId(nextTurnPlayerId);
+    setCurrentTurnPhase(Phases.DRAW_PHASE);
   };
 
   const areCardsValidMeld = cards => {
@@ -179,23 +191,34 @@ function App() {
   };
 
   const cardInHandClickedHandler = (clickedCard, currentPlayer) => {
-    clickedCard.isSelected = !clickedCard.isSelected;
-    setPlayers([...players]);
+    if (currentTurnPhase === Phases.PLAY_PHASE) {
+      clickedCard.isSelected = !clickedCard.isSelected;
+      setPlayers([...players]);
 
-    evaluatePlayableCardSlots(currentPlayer);
+      evaluatePlayableCardSlots(currentPlayer);
+    } else {
+      alert("You must draw a card from the deck or discard pile.");
+    }
   };
 
   const onDiscardPileCardClickedHandler = clickedCard => {
-    const clickedCardIndex = discard.indexOf(clickedCard);
-    const cardsFromDiscardPile = discard.slice(clickedCardIndex);
-    const newDiscardPile = discard.slice(0, clickedCardIndex);
+    if (discard.length > 0 && currentTurnPhase === Phases.DRAW_PHASE) {
+      const clickedCardIndex = discard.indexOf(clickedCard);
+      const cardsFromDiscardPile = discard.slice(clickedCardIndex);
+      const newDiscardPile = discard.slice(0, clickedCardIndex);
 
-    players[currentTurnPlayerId].hand = players[
-      currentTurnPlayerId
-    ].hand.concat(cardsFromDiscardPile);
+      players[currentTurnPlayerId].hand = players[
+        currentTurnPlayerId
+      ].hand.concat(cardsFromDiscardPile);
 
-    setDiscard([...newDiscardPile]);
-    setPlayers([...players]);
+      setDiscard([...newDiscardPile]);
+      setPlayers([...players]);
+      setCurrentTurnPhase(Phases.PLAY_PHASE);
+    } else {
+      alert(
+        "You can't draw twice, you may play a meld and must discard a card."
+      );
+    }
   };
 
   const removeCardFromPlayersHand = (player, card) => {
@@ -292,14 +315,18 @@ function App() {
               onCardInHandClicked={cardInHandClickedHandler}
               onPlayerDiscardClicked={playerDiscardClickedHandler}
               onPlayerMeldClicked={playerMeldClickedHandler}
-              onExtendMeldClicked={(meldId) => onExtendMeldClickedHandler(currentPlayer, meldId)}
+              onExtendMeldClicked={meldId =>
+                onExtendMeldClickedHandler(currentPlayer, meldId)
+              }
             />
           ))}
       </CurrentPlayerArea>
       <OpponentMelds
         currentTurnPlayerId={currentTurnPlayerId}
         players={players}
-        onExtendMeldClicked={(meldId) => onExtendMeldClickedHandler(currentPlayer, meldId)}
+        onExtendMeldClicked={meldId =>
+          onExtendMeldClickedHandler(currentPlayer, meldId)
+        }
       />
     </PlayingArea>
   );
