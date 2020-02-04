@@ -3,7 +3,10 @@ import Deck from './components/Deck';
 import styled from 'styled-components';
 import DiscardPile from './components/DiscardPile';
 import Player from './components/Player';
-import { canMeldSet, canMeldRun } from './utilities/Rummy/rummy500Utils';
+import {
+  areCardsValidMeld,
+  canDiscardCardBeMeldedFromHand
+} from './utilities/Rummy/rummy500Utils';
 import OpponentMelds from './components/OpponentMelds';
 
 const PlayingArea = styled.div`
@@ -141,26 +144,6 @@ function App() {
     setCurrentTurnPhase(Phases.DRAW_PHASE);
   };
 
-  const areCardsValidMeld = cards => {
-    const result = {
-      isValidMeld: false,
-      isValidRun: false,
-      isValidSet: false
-    };
-
-    // check if cards produce a valid meld
-    const isValidSetToBeMelded = canMeldSet(cards);
-    const isValidRunToBeMelded = canMeldRun(cards);
-
-    if (cards.length >= 3 && (isValidSetToBeMelded || isValidRunToBeMelded)) {
-      result.isValidMeld = true;
-      result.isValidSet = isValidSetToBeMelded;
-      result.isValidRun = isValidRunToBeMelded;
-    }
-
-    return result;
-  };
-
   const evaluatePlayableCardSlots = currentPlayer => {
     const selectedCards = getSelectedCardsFromPlayer(currentPlayer);
     // for discards - if only 1 card is selected, and if in discard phase, show slot in discard
@@ -180,7 +163,11 @@ function App() {
     // for melding off of other players' melds - check other players' melds for valid melds and show slots for these areas
     players.forEach(player => {
       player.melds.forEach(meld => {
-        if (areCardsValidMeld(selectedCards.concat(meld.cards)).isValidMeld) {
+        if (
+          areCardsValidMeld(
+            selectedCards.concat(getAllCardsInMeld(meld.meldId))
+          ).isValidMeld
+        ) {
           meld.numberOfMeldableCardSlots = selectedCards.length;
         } else {
           meld.numberOfMeldableCardSlots = 0;
@@ -197,27 +184,52 @@ function App() {
 
       evaluatePlayableCardSlots(currentPlayer);
     } else {
-      alert("You must draw a card from the deck or discard pile.");
+      alert('You must draw a card from the deck or discard pile.');
     }
   };
 
+  const getAllValidMeldIds = () => {
+    const meldIds = players
+      .map(player => player.melds)
+      .flat()
+      .map(meld => meld.meldId);
+    return Array.from(new Set(meldIds));
+  };
+
   const onDiscardPileCardClickedHandler = clickedCard => {
-    if (discard.length > 0 && currentTurnPhase === Phases.DRAW_PHASE) {
+    const currentPlayer = players[currentTurnPlayerId];
+    const canMeldFromHand = canDiscardCardBeMeldedFromHand(
+      clickedCard,
+      currentPlayer.hand
+    );
+    const canMeldToExistingMelds = getAllValidMeldIds().some(
+      meldId =>
+        areCardsValidMeld([...getAllCardsInMeld(meldId), clickedCard])
+          .isValidMeld
+    );
+    // get all of the melds from each players and select their ids, put them into a set to deduplicate
+    // then call the method we just made to get the cards from each meld
+    // inside of the above (use .some), combine the clicked card with that group of cards
+    // and see if it is a valid meld
+
+    if (currentTurnPhase !== Phases.DRAW_PHASE) {
+      alert('Not the right phase');
+    } else if (discard.length === 0) {
+      alert('No cards in discard');
+    } else if (!(canMeldFromHand || canMeldToExistingMelds)) {
+      alert('Cannot meld!');
+    } else {
       const clickedCardIndex = discard.indexOf(clickedCard);
       const cardsFromDiscardPile = discard.slice(clickedCardIndex);
       const newDiscardPile = discard.slice(0, clickedCardIndex);
 
-      players[currentTurnPlayerId].hand = players[
-        currentTurnPlayerId
-      ].hand.concat(cardsFromDiscardPile);
+      currentPlayer.hand = players[currentTurnPlayerId].hand.concat(
+        cardsFromDiscardPile
+      );
 
       setDiscard([...newDiscardPile]);
       setPlayers([...players]);
       setCurrentTurnPhase(Phases.PLAY_PHASE);
-    } else {
-      alert(
-        "You can't draw twice, you may play a meld and must discard a card."
-      );
     }
   };
 
@@ -258,13 +270,18 @@ function App() {
     evaluatePlayableCardSlots(player);
   };
 
-  const onExtendMeldClickedHandler = (currentPlayer, meldId) => {
+  const getAllCardsInMeld = meldId => {
     const cardsCurrentlyInMeld = players
       .map(player => player.melds)
       .flat()
       .filter(meld => meld.meldId === meldId)
       .map(meld => meld.cards)
       .flat();
+    return cardsCurrentlyInMeld;
+  };
+
+  const onExtendMeldClickedHandler = (currentPlayer, meldId) => {
+    const cardsCurrentlyInMeld = getAllCardsInMeld(meldId);
     createMeldForPlayer(currentPlayer, meldId, cardsCurrentlyInMeld);
   };
 

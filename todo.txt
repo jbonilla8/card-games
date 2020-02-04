@@ -1,5 +1,7 @@
 Functionality
 - Require player to meld with 1st card drawn if they drew from the discard
+- If discard has 3, 4, and you have 5, you should be able to pick up 3 and 4
+- Make a testing stacked deck
 - Calling rummy
 - Score keeping - having multiple rounds (hands)
 - Ending the game
