@@ -196,28 +196,30 @@ function App() {
     return Array.from(new Set(meldIds));
   };
 
+  const getRequiredCardToMeld = () => {
+    const currentPlayer = players[currentTurnPlayerId];
+    return currentPlayer.hand.find(card => card.mustBeMeldedRightAway);
+  };
+
   const onDiscardPileCardClickedHandler = clickedCard => {
     const currentPlayer = players[currentTurnPlayerId];
     const canMeldFromHand = canDiscardCardBeMeldedFromHand(
       clickedCard,
       currentPlayer.hand
     );
+
     const canMeldToExistingMelds = getAllValidMeldIds().some(
       meldId =>
         areCardsValidMeld([...getAllCardsInMeld(meldId), clickedCard])
           .isValidMeld
     );
-    // get all of the melds from each players and select their ids, put them into a set to deduplicate
-    // then call the method we just made to get the cards from each meld
-    // inside of the above (use .some), combine the clicked card with that group of cards
-    // and see if it is a valid meld
 
     if (currentTurnPhase !== Phases.DRAW_PHASE) {
       alert('Not the right phase');
     } else if (discard.length === 0) {
       alert('No cards in discard');
     } else if (!(canMeldFromHand || canMeldToExistingMelds)) {
-      alert('Cannot meld!');
+      alert(`The ${clickedCard.rank} of ${clickedCard.suit} cannot be picked up because is not part of a valid meld.`);
     } else {
       const clickedCardIndex = discard.indexOf(clickedCard);
       const cardsFromDiscardPile = discard.slice(clickedCardIndex);
@@ -226,6 +228,8 @@ function App() {
       currentPlayer.hand = players[currentTurnPlayerId].hand.concat(
         cardsFromDiscardPile
       );
+
+      clickedCard.mustBeMeldedRightAway = true;
 
       setDiscard([...newDiscardPile]);
       setPlayers([...players]);
@@ -239,7 +243,15 @@ function App() {
   };
 
   const createMeldForPlayer = (player, meldId, cardsCurrentlyInMeld) => {
+    const cardThatMustBeMelded = getRequiredCardToMeld();
     const selectedCards = getSelectedCardsFromPlayer(player);
+
+    if (cardThatMustBeMelded && !selectedCards.includes(cardThatMustBeMelded)) {
+      alert(
+        `You must play the ${cardThatMustBeMelded.rank} of ${cardThatMustBeMelded.suit} you picked from the discard pile.`
+      );
+      return;
+    }
 
     const validMeldResult = areCardsValidMeld(
       selectedCards.concat(cardsCurrentlyInMeld)
@@ -259,6 +271,7 @@ function App() {
 
     selectedCards.forEach(card => {
       card.isSelected = false;
+      card.mustBeMeldedRightAway = false;
       meld.cards.push(card);
       removeCardFromPlayersHand(player, card);
     });
@@ -301,6 +314,15 @@ function App() {
     }
     if (selectedCards.length > 1) {
       throw new Error('you can not discard more than one card');
+    }
+
+    const cardThatMustBeMelded = getRequiredCardToMeld();
+
+    if (cardThatMustBeMelded) {
+      alert(
+        `You must play the ${cardThatMustBeMelded.rank} of ${cardThatMustBeMelded.suit} you picked from the discard pile.`
+      );
+      return;
     }
 
     const cardToDiscard = selectedCards[0];
