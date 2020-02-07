@@ -7,6 +7,33 @@ import {
   sequenceAceLow
 } from '../cardUtils';
 
+export const Rummy500Phases = {
+  DRAW_PHASE: 'DRAW_PHASE',
+  PLAY_PHASE: 'PLAY_PHASE'
+};
+
+export const getAllValidMeldIds = players => {
+  const meldIds = players
+    .map(player => player.melds)
+    .flat()
+    .map(meld => meld.meldId);
+  return Array.from(new Set(meldIds));
+};
+
+export const getAllCardsInMeld = (players, meldId) => {
+  const cardsCurrentlyInMeld = players
+    .map(player => player.melds)
+    .flat()
+    .filter(meld => meld.meldId === meldId)
+    .map(meld => meld.cards)
+    .flat();
+  return cardsCurrentlyInMeld;
+};
+
+export const getRequiredCardToMeld = currentPlayer => {
+  return currentPlayer.hand.find(card => card.mustBeMeldedRightAway);
+};
+
 // be able to meld set (3+ cards of the same rank of different suits)
 export const canMeldSet = cards =>
   areAllSuitsUnique(cards) && areAllRanksTheSame(cards);
@@ -42,8 +69,8 @@ export const canDiscardCardBeMeldedFromHand = (cardFromDiscard, hand) => {
   const workingHand = [...hand];
   while (workingHand.length > 0) {
     const poppedCard = workingHand.pop();
-    const foundValidMeld = workingHand.some(card =>
-      areCardsValidMeld([cardFromDiscard, poppedCard, card]).isValidMeld
+    const foundValidMeld = workingHand.some(
+      card => areCardsValidMeld([cardFromDiscard, poppedCard, card]).isValidMeld
     );
     if (foundValidMeld) {
       return true;

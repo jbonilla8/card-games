@@ -1,3 +1,50 @@
+
+export const buildShuffledDeck = () => {
+  const suits = ['hearts', 'diamonds', 'spades', 'clubs'];
+  const ranks = [
+    'A',
+    'K',
+    'Q',
+    'J',
+    '10',
+    '9',
+    '8',
+    '7',
+    '6',
+    '5',
+    '4',
+    '3',
+    '2'
+  ];
+
+  const cards = ranks
+    .map(rank =>
+      suits.map(suit => ({
+        suit: suit,
+        rank: rank
+      }))
+    )
+    .flat();
+
+  const getRandomInt = (min, max) => {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
+  };
+
+  cards.sort(() => getRandomInt(-1, 1));
+
+  return cards;
+};
+
+export const getSelectedCardsFromPlayer = player =>
+    player.hand.filter(card => card.isSelected);
+
+export const removeCardFromPlayersHand = (player, card) => {
+  const index = player.hand.indexOf(card);
+  player.hand.splice(index, 1);
+};
+
 const areAllItemsUnique = items => {
   const set = new Set(items);
   return set.size === items.length;
